@@ -14,7 +14,7 @@ def main():
 	for line in input:
 		sp = line.strip().split("\t")
 		assert len(sp) == 2
-		link = sp[0]
+		link = sp[0].lower()
 		name = sp[1]
 		linkToName[link] = name
 	input.close()

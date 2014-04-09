@@ -45,12 +45,12 @@ def main():
 
 	input.close()
 
-	in0 = io.open("in0.txt", "w")
-	out0 = io.open("out0.txt", "w")
-	zero = io.open("zero.txt", "w")
-	twoway = io.open("twoway.txt", "w")
+	in0 = io.open("in0.htm", "w")
+	out0 = io.open("out0.htm", "w")
+	zero = io.open("zero.htm", "w")
+	twoway = io.open("twoway.htm", "w")
 
-	title = generate_titles(edges)
+	title, n2l = generate_stuff(edges)
 
 	in0_num = 0
 	out0_num = 0
@@ -63,16 +63,28 @@ def main():
 		outd = outdegree[node]
 		if ind == 0:
 			in0_num += 1
-			in0.write("%s\n" % title[node])
+			if node in n2l:
+				in0.write("<li><a href=\"%s\">%s</a></li>\n" % (n2l[node], title[node]))
+			#else:
+				#in0.write("<li>%s</li>\n" % (node))
 		if outd == 0:
 			out0_num += 1
-			out0.write("%s\n" % title[node])
+			if node in n2l:
+				out0.write("<li><a href=\"%s\">%s</a></li>\n" % (n2l[node], title[node]))
+			#else:
+				#out0.write("<li>%s</li>\n" % (node))
 		if ind == 0 and outd == 0:
 			zero_num += 1
-			zero.write("%s\n" % title[node])
+			if node in n2l:
+				zero.write("<li><a href=\"%s\">%s</a></li>\n" % (n2l[node], title[node]))
+			#else:
+				#zero.write("<li>%s</li>\n" % (node))
 		if ind != 0 and outd != 0:
 			two_num += 1
-			twoway.write("%s\n" % title[node])
+			if node in n2l:
+				twoway.write("<li><a href=\"%s\">%s</a></li>\n" % (n2l[node], title[node]))
+			#else:
+				#twoway.write("<li>%s</li>\n" % (node))
 		#print "%d\t%d\t%s" % (ind, outd, node)
 
 	print "In0\tOut0\tBoth0\tTwo Way"
@@ -85,53 +97,56 @@ def main():
 
 	#make_graph(edges, indegree, outdegree, title, sys.argv[1], int(sys.argv[2]))
 
-	non_adj(edges, indegree, outdegree, title, sys.argv[1], sys.argv[2], sys.argv[3])
+	non_adj(edges, indegree, outdegree, title, sys.argv[1], sys.argv[2], sys.argv[3], n2l)
 
 
-
-def generate_titles(all):
-	result = {}
+def generate_stuff(all):
+	titles = {}
+	n2l = {}
 	input = io.open("articles.txt", "r")
 
 	for line in input:
 		sp = line.strip().split("\t")
 		link = sp[0]
 		name = sp[1]
-		result[grapher.nodeName(link)] = name
+		node = grapher.nodeName(link)
+		titles[node] = name
+		n2l[node] = link
 
 	input.close()
 
 	for node in all:
-		if not node in result:
-			result[node] = node
+		if not node in titles:
+			titles[node] = node
 
-	return result
+	return titles, n2l
 
 
-def non_adj(edges, indegree, outdegree, title, startnode, fname_un, fname_re):
+def non_adj(edges, indegree, outdegree, title, startnode, fname_un, fname_re, n2l):
 	used = set()
 	unused = set(edges.keys())
 
 	dfs(edges, startnode, used, unused)
 
-	unreachable = []
-	for node in unused:
-		unreachable += [title[node]]
+	unreachable = list(unused)
 	unreachable.sort()
-
-	reachable = []
-	for node in used:
-		reachable += [title[node]]
+	reachable = list(used)
 	reachable.sort()
 
 	out = io.open(fname_un, "w")
-	for article in unreachable:
-		out.write("%s\n" % article)
+	for node in unreachable:
+		if node in n2l.keys():
+			out.write("<li><a href=\"%s\">%s</a></li>\n" % (n2l[node], title[node]))
+		#else:
+			#out.write("<li>%s</li>\n" % node)
 	out.close()
 
 	out = io.open(fname_re, "w")
-	for article in reachable:
-		out.write("%s\n" % article)
+	for node in reachable:
+		if node in n2l.keys():
+			out.write("<li><a href=\"%s\">%s</a></li>\n" % (n2l[node], title[node]))
+		#else:
+			#out.write("<li>%s</li>\n" % node)
 	out.close()
 
 
