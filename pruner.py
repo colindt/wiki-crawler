@@ -83,7 +83,10 @@ def main():
 	zero.close()
 	twoway.close()
 
-	make_graph(edges, indegree, outdegree, title, sys.argv[1], int(sys.argv[2]))
+	#make_graph(edges, indegree, outdegree, title, sys.argv[1], int(sys.argv[2]))
+
+	non_adj(edges, indegree, outdegree, title, sys.argv[1], sys.argv[2], sys.argv[3])
+
 
 
 def generate_titles(all):
@@ -103,6 +106,41 @@ def generate_titles(all):
 			result[node] = node
 
 	return result
+
+
+def non_adj(edges, indegree, outdegree, title, startnode, fname_un, fname_re):
+	used = set()
+	unused = set(edges.keys())
+
+	dfs(edges, startnode, used, unused)
+
+	unreachable = []
+	for node in unused:
+		unreachable += [title[node]]
+	unreachable.sort()
+
+	reachable = []
+	for node in used:
+		reachable += [title[node]]
+	reachable.sort()
+
+	out = io.open(fname_un, "w")
+	for article in unreachable:
+		out.write("%s\n" % article)
+	out.close()
+
+	out = io.open(fname_re, "w")
+	for article in reachable:
+		out.write("%s\n" % article)
+	out.close()
+
+
+def dfs(edges, startnode, used, unused):
+	for node in edges[startnode]:
+		if node in unused:
+			unused -= set([node])
+			used |= set([node])
+			dfs(edges, node, used, unused)
 
 
 def make_graph(edges, indegree, outdegree, title, root, depth):
